@@ -3,6 +3,10 @@
 use rand::{Rng, rngs::StdRng, SeedableRng};
 use chrono::{Datelike, Timelike, Utc};
 
+use rocket::http::Method;
+use rocket::{get, routes};
+use rocket_cors::{AllowedHeaders, AllowedOrigins};
+
 const SUPABASE_URL: &str = "https://nuitnvbkhtnzqbcedbkl.supabase.co";
 const SUPABASE_KEY: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51aXRudmJraHRuenFiY2VkYmtsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY3MDczMzY5OCwiZXhwIjoxOTg2MzA5Njk4fQ.xek_eDtlbEWczVog9dprPzjnEyE32bfPEBbgby_CAG8";
 
@@ -111,11 +115,23 @@ async fn by_author(author: String) -> String {
 
 #[launch]
 fn rocket() -> _ {
+    let allowed_origins = AllowedOrigins::some_exact(&["https://seiyadragon.vercel.app"]);
+
+    let cors = rocket_cors::CorsOptions {
+        allowed_origins,
+        allowed_methods: vec![Method::Get].into_iter().map(From::from).collect(),
+        allowed_headers: AllowedHeaders::some(&["Authorization", "Accept"]),
+        allow_credentials: true,
+        ..Default::default()
+    }.to_cors().unwrap();
+
     rocket::build()
+        .mount("/", routes![quotes])
         .mount("/quotes", routes![quotes])
         .mount("/quotes", routes![quote])
         .mount("/quotes", routes![random])
         .mount("/quotes", routes![by_author])
         .mount("/quotes", routes![daily])
         .mount("/quotes", routes![hourly])
+        .attach(cors)
 }
