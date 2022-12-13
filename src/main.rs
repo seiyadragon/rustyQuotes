@@ -115,13 +115,11 @@ async fn by_author(author: String) -> String {
 
 #[launch]
 fn rocket() -> _ {
-    let allowed_origins = AllowedOrigins::some_exact(&["https://seiyadragon.vercel.app"]);
-
     let cors = rocket_cors::CorsOptions {
-        allowed_origins,
+        allowed_origins: AllowedOrigins::All,
         allowed_methods: vec![Method::Get].into_iter().map(From::from).collect(),
-        allowed_headers: AllowedHeaders::some(&["Authorization", "Accept"]),
-        allow_credentials: true,
+        allowed_headers: AllowedHeaders::all(),
+        allow_credentials: false,
         ..Default::default()
     }.to_cors().unwrap();
 
