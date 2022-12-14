@@ -3,12 +3,32 @@
 use rand::{Rng, rngs::StdRng, SeedableRng};
 use chrono::{Datelike, Timelike, Utc};
 
-use rocket::http::Method;
-use rocket::{get, routes};
-use rocket_cors::{AllowedHeaders, AllowedOrigins};
+use rocket::http::Header;
+use rocket::{Request, Response};
+use rocket::fairing::{Fairing, Info, Kind};
 
 const SUPABASE_URL: &str = "https://nuitnvbkhtnzqbcedbkl.supabase.co";
 const SUPABASE_KEY: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51aXRudmJraHRuenFiY2VkYmtsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY3MDczMzY5OCwiZXhwIjoxOTg2MzA5Njk4fQ.xek_eDtlbEWczVog9dprPzjnEyE32bfPEBbgby_CAG8";
+
+pub struct CORS;
+
+#[rocket::async_trait]
+impl Fairing for CORS {
+    fn info(&self) -> Info {
+        Info {
+            name: "Add CORS headers to responses",
+            kind: Kind::Response
+       }
+    }
+
+
+    async fn on_response<'r>(&self, _req: &'r Request<'_>, response: &mut Response<'r>) {
+        response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
+        response.set_header(Header::new("Access-Control-Allow-Methods", "POST, GET, PATCH, OPTIONS"));
+        response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
+        response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
+    }
+}
 
 async fn get_data() -> String {
     let client = reqwest::Client::new();
@@ -115,15 +135,8 @@ async fn by_author(author: String) -> String {
 
 #[launch]
 fn rocket() -> _ {
-    let cors = rocket_cors::CorsOptions {
-        allowed_origins: AllowedOrigins::All,
-        allowed_methods: vec![Method::Get].into_iter().map(From::from).collect(),
-        allowed_headers: AllowedHeaders::all(),
-        allow_credentials: false,
-        ..Default::default()
-    }.to_cors().unwrap();
-
     rocket::build()
+        .attach(CORS)
         .mount("/", routes![quotes])
         .mount("/quotes", routes![quotes])
         .mount("/quotes", routes![quote])
@@ -131,5 +144,4 @@ fn rocket() -> _ {
         .mount("/quotes", routes![by_author])
         .mount("/quotes", routes![daily])
         .mount("/quotes", routes![hourly])
-        .attach(cors)
 }
