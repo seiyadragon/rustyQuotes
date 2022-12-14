@@ -8,8 +8,7 @@ use rocket::{Request, Response};
 use rocket::fairing::{Fairing, Info, Kind};
 
 const SUPABASE_URL: &str = "https://nuitnvbkhtnzqbcedbkl.supabase.co";
-const SUPABASE_KEY: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51aXRudmJraHRuenFiY2VkYmtsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY3MDczMzY5OCwiZXhwIjoxOTg2MzA5Njk4fQ.xek_eDtlbEWczVog9dprPzjnEyE32bfPEBbgby_CAG8";
-
+const SUPABASE_KEY: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51aXRudmJraHRuenFiY2VkYmtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzA3MzM2OTgsImV4cCI6MTk4NjMwOTY5OH0.pMl9EPd5kWiyLbwgSDtsmZZFXYZh3NdTp2s9_fBcj74";
 pub struct CORS;
 
 #[rocket::async_trait]
@@ -20,7 +19,6 @@ impl Fairing for CORS {
             kind: Kind::Response
        }
     }
-
 
     async fn on_response<'r>(&self, _req: &'r Request<'_>, response: &mut Response<'r>) {
         response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
